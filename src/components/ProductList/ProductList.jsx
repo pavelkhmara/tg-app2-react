@@ -2,6 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import './ProductList.css';
 import ProductItem from '../ProductItem/ProductItem';
 import { useTelegram } from '../../hooks/useTelegram';
+require('dotenv').config();
 
 const products = [
   {id: '1', title: 'Juice', price: 200, description: 'Fresh juice 1l'},
@@ -22,6 +23,9 @@ const getTotalPrice = (items) => {
     }, 0);
 }
 
+const ip = process.env.IP_ADDRESS,
+      port = process.env.PORT;
+
 const ProductList = () => {
     const [ addedItems, setAddedItems ] = React.useState([]);
     const { tg, queryId } = useTelegram();
@@ -32,7 +36,7 @@ const ProductList = () => {
                 totalPrice: getTotalPrice(addedItems),
                 queryId
             };
-            fetch('http://localhost:8000', {
+            fetch('http://' + ip + ':' + port || 'http://localhost', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
