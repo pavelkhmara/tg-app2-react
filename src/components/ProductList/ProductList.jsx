@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import './ProductList.css';
 import ProductItem from '../ProductItem/ProductItem';
 import { useTelegram } from '../../hooks/useTelegram';
@@ -22,9 +22,31 @@ const getTotalPrice = (items) => {
     }, 0);
 }
 
-const ProductList = ({product, onRemove}) => {
+const ProductList = () => {
     const [ addedItems, setAddedItems ] = React.useState([]);
-    const { tg } = useTelegram();
+    const { tg, queryId } = useTelegram();
+
+    const onSendData = useCallback( () => {
+            const data = { 
+                products: addedItems, 
+                totalPrice: getTotalPrice(addedItems),
+                queryId
+            };
+            fetch('http://localhost:8000', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+        })
+    
+        useEffect(() => {
+            tg.onEvent('mainButtonClicked', onSendData);
+            return () => {
+                tg.offEvent('mainButtonClicked', onSendData);
+            }
+        }, [onSendData]);
 
     const onAdd = (product) => {
         const alreadyAdded = addedItems.find(item => item.id === product.id);
@@ -48,9 +70,9 @@ const ProductList = ({product, onRemove}) => {
         }
     }
 
-    React.useEffect(() => {
-        setAddedItems(product);
-    }, [product]);
+    // React.useEffect(() => {
+    //     setAddedItems(product);
+    // }, [product]);
 
     return (
         <div className={'list'}>
@@ -58,7 +80,6 @@ const ProductList = ({product, onRemove}) => {
                 <ProductItem
                     product={item}
                     onAdd={onAdd}
-                    onRemove={onRemove}
                     className={'item'}
                     key={item.id}
                 />
