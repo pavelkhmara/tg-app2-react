@@ -8,6 +8,22 @@ const Form = () => {
     const [ subject, setSubject ] = React.useState('physical');
     const { tg } = useTelegram();
 
+    const onSendData = () => {
+        const data = {
+            country,
+            street,
+            subject
+        }
+        tg.sendData(JSON.stringify(data));
+    }
+
+    useEffect(() => {
+        tg.onEvent('mainButtonClicked', onSendData);
+        return () => {
+            tg.offEvent('mainButtonClicked', onSendData);
+        }
+    }, [onSendData]);
+
     useEffect(() => {
         tg.MainButton.setParams({
             text: 'Send data'
@@ -43,7 +59,6 @@ const Form = () => {
             <option value={'physical'}>Individual</option>
             <option value={'legal'}>Company</option>
         </select>
-        <button className={'button'}>Send</button>
     </div>
   );
 };
