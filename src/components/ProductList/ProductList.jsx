@@ -36,7 +36,7 @@ const ProductList = () => {
                 totalPrice: getTotalPrice(addedItems),
                 queryId
             };
-            fetch('http://' + ip + ':' + port || 'http://localhost', {
+            fetch('http://' + ip + ':' + port + '/web-data' || 'http://localhost', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
