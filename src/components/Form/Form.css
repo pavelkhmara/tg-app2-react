@@ -1,0 +1,19 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 20px;
+}
+
+.input {
+    margin-top: 15px;
+    padding: 10px;
+    border: 1px solid var(--tg-theme-button-color);
+    border-radius: 5px;
+    width: 100%;
+}
+
+.select {
+    margin-top: 15px;
+    padding: 10px;
+}
