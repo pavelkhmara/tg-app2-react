@@ -1,4 +1,4 @@
-import React, { use, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import './Form.css';
 import { useTelegram } from '../../hooks/useTelegram';
 
@@ -12,7 +12,7 @@ const Form = () => {
         tg.MainButton.setParams({
             text: 'Send data'
         });
-    }, []);
+    });
 
     useEffect(() => {
         if(!street || !country) {

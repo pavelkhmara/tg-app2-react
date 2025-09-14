@@ -3,7 +3,11 @@ export function useTelegram() {
     const tg = window.Telegram.WebApp;
 
     const onClose = () => {
-        tg.close();
+        if (tg?.close) {
+            tg.close();
+        } else {
+            alert('Закрытие доступно только внутри Telegram WebApp');
+        }
     }
 
     const onToggleButton = () => {
