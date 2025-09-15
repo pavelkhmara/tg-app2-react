@@ -2,7 +2,6 @@ import React, { useEffect, useCallback } from 'react';
 import './ProductList.css';
 import ProductItem from '../ProductItem/ProductItem';
 import { useTelegram } from '../../hooks/useTelegram';
-require('dotenv').config();
 
 const products = [
   {id: '1', title: 'Juice', price: 200, description: 'Fresh juice 1l'},
@@ -43,14 +42,14 @@ const ProductList = () => {
                 },
                 body: JSON.stringify(data),
             });
-        }, [addedItems, queryId, tg]);
+        }, [addedItems, queryId] );
     
         useEffect(() => {
             tg.onEvent('mainButtonClicked', onSendData);
             return () => {
                 tg.offEvent('mainButtonClicked', onSendData);
             }
-        }, [onSendData]);
+        }, [onSendData, tg]);
 
     const onAdd = (product) => {
         const alreadyAdded = addedItems.find(item => item.id === product.id);
