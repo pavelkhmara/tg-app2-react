@@ -2,6 +2,9 @@
 
 Demo: [visit @react_node_web_app_bot](https://t.me/react_node_web_app_bot)
 
+## Backend
+Backend repo: [backend](https://github.com/pavelkhmara/tg-app2-nodejs)
+
 ## 🚀 Overview
 
 - **Static bundle:** Built with `npm run build` and served by [`serve`](https://www.npmjs.com/package/serve)
