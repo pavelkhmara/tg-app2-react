@@ -22,8 +22,8 @@ const getTotalPrice = (items) => {
     }, 0);
 }
 
-const ip = process.env.IP_ADDRESS,
-      port = process.env.PORT;
+const API_URL = process.env.BACKEND_API_URL || '',
+      PORT = process.env.PORT || 80;
 
 const ProductList = () => {
     const [ addedItems, setAddedItems ] = React.useState([]);
@@ -35,7 +35,7 @@ const ProductList = () => {
                 totalPrice: getTotalPrice(addedItems),
                 queryId
             };
-            fetch('http://' + ip + ':' + port + '/web-data' || 'http://localhost', {
+            fetch(`${API_URL}/web-data` || 'http://localhost:' + PORT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
