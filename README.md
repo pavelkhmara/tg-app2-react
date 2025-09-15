@@ -1,6 +1,6 @@
 # React Frontend for a Telegram Web App
 
-Demo: [visit @react_node_web_app_bot](t.me/react_node_web_app_bot)
+Demo: [visit @react_node_web_app_bot](https://t.me/react_node_web_app_bot)
 
 ## 🚀 Overview
 
