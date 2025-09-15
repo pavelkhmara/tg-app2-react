@@ -1,70 +1,137 @@
-# Getting Started with Create React App
+# React Frontend for a Telegram Web App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Demo: [visit @react_node_web_app_bot](t.me/react_node_web_app_bot)
 
-## Available Scripts
+## 🚀 Overview
 
-In the project directory, you can run:
+- **Static bundle:** Built with `npm run build` and served by [`serve`](https://www.npmjs.com/package/serve)
+- **API:** Uses the [Telegram Web Apps API](https://core.telegram.org/bots/webapps) (`window.Telegram.WebApp`)
+- **Main button:** On click, posts selected items to `POST /web-data`
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 🛠️ Tech Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **React** (CRA/Vite compatible)
+- [`serve`](https://www.npmjs.com/package/serve) (static hosting)
+- [PM2](https://pm2.keymetrics.io/) (process manager)
+- [Nginx](https://nginx.org/) (reverse proxy, TLS termination)
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## ⚡ Quick Start (Local)
 
-### `npm run build`
+```bash
+git clone <repo-url>
+cd tg-app2-react
+npm install
+npm start               # if dev script exists
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+# or build & serve
+npm run build
+npx serve -s build -l 8001
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🔗 Calling the Backend (Recommended)
 
-### `npm run eject`
+**Use a relative path** so requests go to the same domain over HTTPS:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```js
+fetch('/web-data', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload),
+});
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- This avoids mixed content and CORS issues.
+- Lets Nginx route `/web-data` to the backend.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+**If you need a full URL, expose it via env (CRA example):**
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```env
+BACKEND_API_URL=<your-domain.com>  # Telegram web-apps allow https ONLY
+```
 
-## Learn More
+```js
+const API_URL = process.env.BACKEND_API_URL || '';
+fetch(`${API_URL}/web-data`, { ... });
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+> **Note:** CRA only injects variables prefixed with `BACKEND_`, and you must rebuild after changing `.env`.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## 🏗️ Build & Run (Production)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```bash
+npm run build
+pm2 start "serve -s build -l 8001" --name tg-webapp-frontend
+pm2 save
+pm2 logs tg-webapp-frontend
+```
 
-### Analyzing the Bundle Size
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## 🌐 Nginx (Paired with Backend)
 
-### Making a Progressive Web App
+- **Frontend:** Proxied from `/` to port `8001`
+- **API:** Proxied from `/web-data` to `8000` (see Backend README for the full server block)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+**If you prefer Nginx to serve static files directly (no `serve`):**
 
-### Advanced Configuration
+```nginx
+location / {
+    root /srv/tg-web-app/frontend/tg-app2-react/build;
+    try_files $uri /index.html;
+}
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+> Use this SPA pattern if you rely on client-side routes like `/form`.
 
-### Deployment
+---
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## 🤖 Telegram Web App Notes
 
-### `npm run build` fails to minify
+- **Open the app via a HTTPS URL** (e.g., `https://<your-domain.com>`)
+- In your bot’s `/start` handler, use:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+**Inline keyboard:**
+```js
+{ web_app: { url: 'https://<your-domain.com>' } }
+```
+
+**Reply keyboard:**
+```js
+{ web_app: { url: 'https://<your-domain.com>/form' } }
+```
+
+---
+
+## 🐞 Troubleshooting
+
+- **Clicking main button does nothing:**  
+  Verify you subscribe/unsubscribe correctly:
+  ```js
+  useEffect(() => {
+    tg.onEvent('mainButtonClicked', onSendData);
+    return () => tg.offEvent('mainButtonClicked', onSendData);
+  }, [onSendData, tg]);
+  ```
+
+- **404 on `/form` when reloading:**  
+  Static server doesn’t know client routes.  
+  Either use `HashRouter` or switch to the Nginx `try_files` SPA setup above.
+
+- **Mixed content:**  
+  Never post to `http://IP:PORT` from an HTTPS page.  
+  Use `/web-data` or `https://<domain>`.
+
+---
+
+## 🙏 Credits
+
+This frontend was created by following and adapting the YouTube tutorial:  
+[https://www.youtube.com/watch?v=MzO-0IYkZMU](https://www.youtube.com/watch?v=MzO-0IYkZMU)
